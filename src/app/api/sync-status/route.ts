@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Global sync state (in production, use Redis or database)
-let syncInProgress = false
-let syncProgress = { message: '', progress: 0, total: 100 }
+import { getSyncStatus, setSyncInProgress, setSyncProgress } from '@/lib/sync/status'
 
 export async function GET() {
-  return NextResponse.json({
-    inProgress: syncInProgress,
-    progress: syncProgress
-  })
+  return NextResponse.json(getSyncStatus())
 }
 
 export async function POST(request: NextRequest) {
@@ -16,25 +10,16 @@ export async function POST(request: NextRequest) {
   const { action } = body
 
   if (action === 'cancel') {
-    syncInProgress = false
-    syncProgress = { message: 'Sync cancelled', progress: 0, total: 100 }
+    setSyncInProgress(false)
+    setSyncProgress('Sync cancelled', 0, 100)
     return NextResponse.json({ message: 'Sync cancelled successfully' })
   }
 
   if (action === 'start') {
-    syncInProgress = true
-    syncProgress = { message: 'Starting sync...', progress: 0, total: 100 }
+    setSyncInProgress(true)
+    setSyncProgress('Starting sync...', 0, 100)
     return NextResponse.json({ message: 'Sync started' })
   }
 
   return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
-}
-
-// Export functions for other endpoints to use
-export function setSyncProgress(message: string, progress?: number, total?: number) {
-  syncProgress = { message, progress: progress || 0, total: total || 100 }
-}
-
-export function setSyncInProgress(inProgress: boolean) {
-  syncInProgress = inProgress
 }

@@ -32,7 +32,7 @@ CREATE TABLE packages (
     id VARCHAR(100) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    version VARCHAR(50),
+    version VARCHAR(255),
     platform_id VARCHAR(50) NOT NULL REFERENCES platforms(id),
     category_id INTEGER REFERENCES categories(id),
     license_id INTEGER REFERENCES licenses(id),

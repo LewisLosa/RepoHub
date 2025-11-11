@@ -1,9 +1,17 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { SimplePackageFetcher } from '@/services/simplePackageFetcher'
 import { PlatformInitializer } from '@/services/platformInitializer'
-import { setSyncInProgress, setSyncProgress } from '@/app/api/sync-status/route'
+import { setSyncInProgress, setSyncProgress } from '@/lib/sync/status'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export async function GET(request: NextRequest) {
+  // Skip any heavy sync work during static generation/build unless explicitly enabled
+  if (process.env.ENABLE_SYNC_DURING_BUILD !== 'true') {
+    // Return a lightweight JSON response so build doesn't hang
+    return NextResponse.json({ disabled: true, reason: 'Sync disabled during build' })
+  }
   const encoder = new TextEncoder()
   let cancelled = false
   

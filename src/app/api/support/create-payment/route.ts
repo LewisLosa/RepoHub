@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 const CRYPTOMUS_API_URL = 'https://api.cryptomus.com/v1/payment'
 const MERCHANT_ID = process.env.CRYPTOMUS_MERCHANT_ID || ''
 const PAYMENT_API_KEY = process.env.CRYPTOMUS_PAYMENT_API_KEY || ''
+const CRYPTOMUS_ENABLED = process.env.CRYPTOMUS_ENABLED !== 'false'
 
 interface PaymentRequest {
   amount: number
@@ -35,6 +36,13 @@ function generateSign(data: any, apiKey: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!CRYPTOMUS_ENABLED) {
+      return NextResponse.json(
+        { error: 'Payment service is temporarily disabled' },
+        { status: 503 }
+      )
+    }
+
     if (!MERCHANT_ID || !PAYMENT_API_KEY) {
       return NextResponse.json(
         { error: 'Payment service not configured' },

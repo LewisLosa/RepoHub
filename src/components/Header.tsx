@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { useTheme } from '@/hooks/useTheme'
 import { useLocale } from '@/contexts/LocaleContext'
@@ -11,6 +11,22 @@ export function Header() {
   const { theme, isDark, toggleTheme } = useTheme()
   const { locale, toggleLocale, t } = useLocale()
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
+  const [cryptomusEnabled, setCryptomusEnabled] = useState(true)
+
+  useEffect(() => {
+    const checkCryptomusStatus = async () => {
+      try {
+        const response = await fetch('/api/support/status')
+        const data = await response.json()
+        setCryptomusEnabled(data.cryptomus_enabled)
+      } catch (error) {
+        // Default to enabled if check fails
+        setCryptomusEnabled(true)
+      }
+    }
+
+    checkCryptomusStatus()
+  }, [])
 
   const getThemeIcon = () => {
     switch (theme) {
@@ -48,18 +64,20 @@ export function Header() {
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* Support Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSupportModalOpen(true)}
-            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
-          >
-            <Heart className="h-4 w-4" />
-            <span className="ml-2 hidden sm:inline">
-              {t('support.title')}
-            </span>
-          </Button>
+          {/* Support Button - Only show when Cryptomus is enabled */}
+          {cryptomusEnabled && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsSupportModalOpen(true)}
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+            >
+              <Heart className="h-4 w-4" />
+              <span className="ml-2 hidden sm:inline">
+                {t('support.title')}
+              </span>
+            </Button>
+          )}
 
           {/* Theme Toggle */}
           <Button

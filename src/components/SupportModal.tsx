@@ -7,16 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useLocale } from '@/contexts/LocaleContext'
-import { Loader2, Heart, AlertCircle, CheckCircle } from 'lucide-react'
+import { Loader2, Heart, AlertCircle } from 'lucide-react'
 
 interface SupportModalProps {
   isOpen: boolean
   onClose: () => void
-}
-
-interface PaymentData {
-  payment_url: string
-  payment_id: string
 }
 
 export function SupportModal({ isOpen, onClose }: SupportModalProps) {
@@ -24,7 +19,6 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const [currency, setCurrency] = useState('USDT')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
-  const [payment, setPayment] = useState<PaymentData | null>(null)
   const [error, setError] = useState('')
   const { t } = useLocale()
 
@@ -41,7 +35,6 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    setPayment(null)
 
     try {
       const response = await fetch('/api/support/create-payment', {
@@ -64,7 +57,10 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
         throw new Error(data.error || 'Payment creation failed')
       }
 
-      setPayment(data)
+      // Redirect immediately to payment URL
+      window.open(data.payment_url, '_blank')
+      resetForm()
+      onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
@@ -76,7 +72,6 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
     setAmount('')
     setCurrency('USDT')
     setEmail('')
-    setPayment(null)
     setError('')
   }
 
@@ -108,112 +103,70 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!payment ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount">{t('support.amount')}</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  min="1"
-                  placeholder="10.00"
-                  value={amount}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="currency">{t('support.currency')}</Label>
-                <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cryptoOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">{t('support.email_optional')}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                />
-              </div>
-
-              {error && (
-                <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                  <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm">{error}</span>
-                </div>
-              )}
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading || !amount}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('support.creating')}
-                  </>
-                ) : (
-                  t('support.create_payment')
-                )}
-              </Button>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 text-green-600 bg-green-50 p-3 rounded-lg">
-                <CheckCircle className="h-4 w-4" />
-                <span className="text-sm">{t('support.payment_created')}</span>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t('support.payment_id')}</Label>
-                <div className="p-2 bg-muted rounded font-mono text-sm">
-                  {payment.payment_id}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t('support.amount_to_pay')}</Label>
-                <div className="p-2 bg-muted rounded text-sm">
-                  {amount} {currency}
-                </div>
-              </div>
-
-              <Button 
-                onClick={() => window.open(payment.payment_url, '_blank')}
-                className="w-full"
-              >
-                {t('support.pay_now')}
-              </Button>
-
-              <div className="text-xs text-muted-foreground text-center">
-                {t('support.payment_note')}
-              </div>
-
-              <Button 
-                variant="outline" 
-                onClick={resetForm}
-                className="w-full"
-              >
-                {t('support.create_another')}
-              </Button>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount">{t('support.amount')}</Label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                min="1"
+                placeholder="10.00"
+                value={amount}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)}
+                required
+              />
             </div>
-          )}
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">{t('support.currency')}</Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {cryptoOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">{t('support.email_optional')}</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              />
+            </div>
+
+            {error && (
+              <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-sm">{error}</span>
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading || !amount}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('support.creating')}
+                </>
+              ) : (
+                t('support.create_payment')
+              )}
+            </Button>
+          </form>
 
           <div className="text-xs text-muted-foreground space-y-1">
             <p>{t('support.secure_payment')}</p>

@@ -15,19 +15,13 @@ function verifySign(data: any, apiKey: string): boolean {
   // Extract sign from data and create a copy without it
   const { sign: receivedSign, ...dataToVerify } = data
   
-  // Sort keys and create JSON string
-  const sortedData = Object.keys(dataToVerify)
-    .sort()
-    .reduce((result: any, key: string) => {
-      result[key] = dataToVerify[key]
-      return result
-    }, {})
-  
-  const jsonString = JSON.stringify(sortedData)
+  // Cryptomus signature: MD5(base64(JSON) + API_KEY)
+  const jsonString = JSON.stringify(dataToVerify)
+  const base64Data = Buffer.from(jsonString).toString('base64')
   
   // Generate expected signature
   const crypto = require('crypto')
-  const expectedSign = crypto.createHash('md5').update(jsonString + apiKey).digest('hex')
+  const expectedSign = crypto.createHash('md5').update(base64Data + apiKey).digest('hex')
   
   return receivedSign === expectedSign
 }

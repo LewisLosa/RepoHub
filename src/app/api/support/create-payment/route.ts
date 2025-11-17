@@ -25,23 +25,12 @@ interface CryptomusResponse {
 }
 
 function generateSign(data: any, apiKey: string): string {
-  // Convert data to JSON and sort keys for consistent signature
-  const sortedData = Object.keys(data)
-    .sort()
-    .reduce((result: any, key: string) => {
-      result[key] = data[key]
-      return result
-    }, {})
+  // Cryptomus signature: MD5(base64(JSON) + API_KEY)
+  const jsonString = JSON.stringify(data)
+  const base64Data = Buffer.from(jsonString).toString('base64')
   
-  const jsonString = JSON.stringify(sortedData)
-  
-  // Create MD5 hash using Web Crypto API
-  const encoder = new TextEncoder()
-  const dataBuffer = encoder.encode(jsonString + apiKey)
-  
-  // For server-side, we'll use Node.js crypto
   const crypto = require('crypto')
-  return crypto.createHash('md5').update(jsonString + apiKey).digest('hex')
+  return crypto.createHash('md5').update(base64Data + apiKey).digest('hex')
 }
 
 export async function POST(request: NextRequest) {

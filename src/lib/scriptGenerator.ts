@@ -2,7 +2,7 @@ import { SelectedPackage, Platform, GeneratedScript } from '@/types'
 
 export function generateScript(packages: SelectedPackage[], platform: Platform): GeneratedScript {
   const script = createScriptContent(packages, platform)
-  
+
   return {
     platform: platform.id,
     script,
@@ -31,7 +31,7 @@ function createScriptContent(packages: SelectedPackage[], platform: Platform): s
 
 function generateDebianBasedScript(packages: SelectedPackage[], platformName: string): string {
   const packageNames = packages.map(p => p.name).join(' ')
-  
+
   return `#!/bin/bash
 
 # RepoHub Installation Script for ${platformName}
@@ -65,7 +65,7 @@ echo "Installation completed!"`
 
 function generateFedoraScript(packages: SelectedPackage[]): string {
   const packageNames = packages.map(p => p.name).join(' ')
-  
+
   return `#!/bin/bash
 
 # RepoHub Installation Script for Fedora
@@ -99,7 +99,7 @@ echo "Installation completed!"`
 
 function generateArchScript(packages: SelectedPackage[]): string {
   const packageNames = packages.map(p => p.name).join(' ')
-  
+
   return `#!/bin/bash
 
 # RepoHub Installation Script for Arch Linux
@@ -110,13 +110,34 @@ set -e
 
 echo "Starting package installation for Arch Linux..."
 
+# Check if yay is installed
+if ! command -v yay &> /dev/null; then
+    echo "yay is not installed. Installing yay..."
+    
+    # Install dependencies
+    echo "Installing dependencies..."
+    sudo pacman -S --needed --noconfirm git base-devel
+    
+    # Clone and build yay
+    echo "Building yay..."
+    git clone https://aur.archlinux.org/yay-bin.git
+    cd yay-bin
+    makepkg -si --noconfirm
+    cd ..
+    rm -rf yay-bin
+    
+    echo "yay installed successfully!"
+else
+    echo "yay is already installed."
+fi
+
 # Update package lists
 echo "Updating package lists..."
-sudo pacman -Sy --noconfirm
+yay -Sy --noconfirm
 
 # Install packages
 echo "Installing packages: ${packageNames}"
-sudo pacman -S --noconfirm ${packageNames}
+yay -S --noconfirm ${packageNames}
 
 # Verify installation
 echo "Verifying installation..."
@@ -133,7 +154,7 @@ echo "Installation completed!"`
 
 function generateWindowsScript(packages: SelectedPackage[]): string {
   const packageNames = packages.map(p => p.name).join(' ')
-  
+
   return `# RepoHub Installation Script for Windows
 # Generated on ${new Date().toISOString()}
 # This script is idempotent and safe to run multiple times
@@ -186,7 +207,7 @@ Write-Host 'Installation completed!'`
 
 function generateMacOSScript(packages: SelectedPackage[]): string {
   const packageNames = packages.map(p => p.name).join(' ')
-  
+
   return `#!/bin/bash
 
 # RepoHub Installation Script for macOS

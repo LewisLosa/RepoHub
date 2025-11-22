@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/contexts/LocaleContext";
 import { SupportModal } from "@/components/SupportModal";
@@ -16,14 +16,32 @@ export interface HeaderProps {
 export function Header({ cryptomusEnabled }: HeaderProps) {
   const { locale, toggleLocale, t } = useLocale();
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
       {/* Full Screen Hero Section */}
       <section className="relative min-h-screen w-full flex flex-col">
         {/* Top Navigation Bar */}
-        <div className="absolute top-0 left-0 right-0 z-50 border-b border-border/40 pointer-events-auto">
-          <div className="container flex h-14 items-center justify-between">
+        <div className={`fixed top-0 left-0 right-0 z-50 pointer-events-auto transition-all duration-300 ${
+          isScrolled 
+            ? 'mt-4' 
+            : 'mt-0'
+        }`}>
+          <div className={`mx-auto flex h-14 items-center justify-between transition-all duration-300 ${
+            isScrolled
+              ? 'max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-4xl rounded-full border border-border/40 bg-background/80 backdrop-blur-md shadow-lg px-4 sm:px-6'
+              : 'container'
+          }`}>
             <div className="flex items-center space-x-1">
               <div className="relative h-10 w-10">
                 <Image

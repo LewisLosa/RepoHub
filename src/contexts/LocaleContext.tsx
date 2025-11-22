@@ -10,6 +10,7 @@ const translations = {
       title: "RepoHub - Cross-Platform Package Manager",
       subtitle: "Cross-Platform Package Manager",
       description: "Simplify software installation across Linux, Windows, and macOS with official repositories",
+      status: "All Systems Operational",
       close: "Close"
     },
     platform: {
@@ -113,6 +114,7 @@ const translations = {
       title: "RepoHub - Çok Platformlu Paket Yöneticisi",
       subtitle: "Çok Platformlu Paket Yöneticisi",
       description: "Linux, Windows ve macOS'te resmi depoları kullanarak yazılım kurulumunu basitleştirin",
+      status: "Tüm Sistemler Çalışıyor",
       close: "Kapat"
     },
     platform: {

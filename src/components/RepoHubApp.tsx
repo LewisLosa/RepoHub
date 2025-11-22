@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { LocaleProvider } from "@/contexts/LocaleContext";
-import { Header } from "./Header";
+import { Navbar } from "./Navbar";
+import { HeroSection } from "./HeroSection";
 import { PlatformSelector } from "./PlatformSelector";
 import { PackageBrowserV2 } from "./PackageBrowserV2";
 import { SelectionManager } from "./SelectionManager";
@@ -79,7 +80,8 @@ function RepoHubAppContent({
       key={locale}
       className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/20"
     >
-      <Header cryptomusEnabled={cryptomusEnabled} />
+      <Navbar cryptomusEnabled={cryptomusEnabled} />
+      <HeroSection />
 
       <div className="container mx-auto px-4 py-8">
         {/* Main Content */}
